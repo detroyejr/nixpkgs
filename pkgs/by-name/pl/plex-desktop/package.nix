@@ -6,10 +6,8 @@
   elfutils,
   expat,
   extraEnv ? { },
-  fetchFromGitLab,
   fetchurl,
   glib,
-  glibc,
   lib,
   libGL,
   libapparmor,
@@ -51,16 +49,6 @@ let
     mainProgram = "plex-desktop";
   };
 
-  # The latest unstable version isn't compatible with libraries that ship in the snap.
-  libglvnd-1_4_0 = libglvnd.overrideAttrs {
-    src = fetchFromGitLab {
-      domain = "gitlab.freedesktop.org";
-      owner = "glvnd";
-      repo = "libglvnd";
-      rev = "v1.4.0";
-      sha256 = "sha256-Y6JHRygXcZtnrdnqi1Lzyvh/635gwZWnMeW9aRCpxxs";
-    };
-  };
   plex-desktop = stdenv.mkDerivation {
     inherit pname version meta;
 
@@ -113,11 +101,22 @@ let
 
       cp -r . $out
 
+      CLEANUP=(
+        "usr/lib/x86_64-linux-gnu/libEGL.so*"
+        "usr/lib/x86_64-linux-gnu/libdrm.so*"
+        "usr/lib/x86_64-linux-gnu/libdrm_*.so*"
+        "usr/lib/x86_64-linux-gnu/libpciaccess.so*"
+        "usr/lib/x86_64-linux-gnu/libswresample.so*"
+        "usr/lib/x86_64-linux-gnu/libva-*.so*"
+        "usr/lib/x86_64-linux-gnu/libva.so*"
+        "usr/lib/x86_64-linux-gnu/libasound*"
+      )
+      for path in $CLEANUP;
+        do rm "$out/$path"
+      done
+
+      rm -r $out/lib/dri
       ln -s ${libedit}/lib/libedit.so.0 $out/lib/libedit.so.2
-      rm $out/usr/lib/x86_64-linux-gnu/libasound.so.2
-      ln -s ${alsa-lib}/lib/libasound.so.2 $out/usr/lib/x86_64-linux-gnu/libasound.so.2
-      rm $out/usr/lib/x86_64-linux-gnu/libasound.so.2.0.0
-      ln -s ${alsa-lib}/lib/libasound.so.2.0.0 $out/usr/lib/x86_64-linux-gnu/libasound.so.2.0.0
 
       runHook postInstall
     '';
@@ -159,7 +158,7 @@ buildFHSEnv {
     LD_LIBRARY_PATH=${
       lib.makeLibraryPath [
         plex-desktop
-        libglvnd-1_4_0
+        libglvnd
       ]
     }:$PLEX_USR_PATH
     LIBGL_DRIVERS_PATH=$PLEX_USR_PATH/dri
