@@ -78,7 +78,3 @@ if ! nix-build -A plex-desktop "$nixpkgs"; then
   echo "The updated plex-desktop failed to build."
   exit 1
 fi
-
-# Commit changes
-git add "$plex_nix"
-git commit -m "plex-desktop: ${current_version} -> ${upstream_version}"
