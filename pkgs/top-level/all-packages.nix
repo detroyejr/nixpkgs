@@ -10802,6 +10802,18 @@ with pkgs;
     packages = [];
   };
 
+  positronWrapper = callPackage ../development/r-modules/wrapper-positron.nix {
+    recommendedPackages = with rPackages; [
+      boot class cluster codetools foreign KernSmooth lattice MASS
+      Matrix mgcv nlme nnet rpart spatial survival
+    ];
+    positron = positron-bin;
+    # Override this attribute to register additional libraries.
+    packages = [];
+    # Add additional packages like python.
+    extraPackages = [];
+  };
+
   rstudioServerWrapper = rstudioWrapper.override { rstudio = rstudio-server; };
 
   rPackages = (dontRecurseIntoAttrs (callPackage ../development/r-modules {
