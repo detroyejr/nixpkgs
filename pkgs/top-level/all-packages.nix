@@ -10778,6 +10778,21 @@ with pkgs;
     ];
     # Override this attribute to register additional libraries.
     packages = [];
+    extraPackages = [];
+
+    # IDE's
+    R = R;
+    rstudio = rstudio;
+    positron = positron-bin;
+    radian = python3Packages.radian;
+
+    # Wrappers
+    rstudioWrapper = rstudioWrapper;
+    positronWrapper = positronWrapper;
+    radianWrapper = radianWrapper;
+
+    wrapR = false;
+    ide = null;
   };
 
   radianWrapper = callPackage ../development/r-modules/wrapper-radian.nix {
