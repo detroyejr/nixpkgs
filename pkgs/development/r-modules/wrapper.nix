@@ -56,7 +56,6 @@ in
 if ide == "rstudio" then
   rstudioWrapper.override {
     inherit
-      extraPackages
       packages
       rstudio
       recommendedPackages
