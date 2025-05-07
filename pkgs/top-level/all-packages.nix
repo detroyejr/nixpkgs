@@ -10196,6 +10196,9 @@ with pkgs;
     ];
     # Override this attribute to register additional libraries.
     packages = [ ];
+
+    # Accepts rstudio, radian, and null.
+    ide = null;
   };
 
   radianWrapper = callPackage ../development/r-modules/wrapper-radian.nix {

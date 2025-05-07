@@ -5,34 +5,48 @@
   makeWrapper,
   recommendedPackages,
   packages,
+  ide,
+  rstudioWrapper,
+  radianWrapper,
+  ...
 }:
-symlinkJoin {
-  name = R.name + "-wrapper";
-  preferLocalBuild = true;
-  allowSubstitutes = false;
+let
+  rWrapper = symlinkJoin {
+    name = R.name + "-wrapper";
+    preferLocalBuild = true;
+    allowSubstitutes = false;
 
-  buildInputs = [ R ] ++ recommendedPackages ++ packages;
-  paths = [ R ];
+    buildInputs = [ R ] ++ recommendedPackages ++ packages;
+    paths = [ R ];
 
-  nativeBuildInputs = [ makeWrapper ];
+    nativeBuildInputs = [ makeWrapper ];
 
-  postBuild = ''
-    cd ${R}/bin
-    for exe in *; do
-      rm "$out/bin/$exe"
+    postBuild = ''
+      cd ${R}/bin
+      for exe in *; do
+        rm "$out/bin/$exe"
 
-      makeWrapper "${R}/bin/$exe" "$out/bin/$exe" \
-        --prefix "R_LIBS_SITE" ":" "$R_LIBS_SITE"
-    done
-  '';
+        makeWrapper "${R}/bin/$exe" "$out/bin/$exe" \
+          --prefix "R_LIBS_SITE" ":" "$R_LIBS_SITE"
+      done
+    '';
 
-  # Make the list of recommended R packages accessible to other packages such as rpy2
-  passthru = { inherit recommendedPackages; };
+    # Make the list of recommended R packages accessible to other packages such as rpy2
+    passthru = { inherit recommendedPackages; };
 
-  meta = R.meta // {
-    # To prevent builds on hydra
-    hydraPlatforms = [ ];
-    # prefer wrapper over the package
-    priority = (R.meta.priority or lib.meta.defaultPriority) - 1;
+    meta = R.meta // {
+      # To prevent builds on hydra
+      hydraPlatforms = [ ];
+      # prefer wrapper over the package
+      priority = (R.meta.priority or lib.meta.defaultPriority) - 1;
+    };
   };
-}
+in
+if ide == null then
+  rWrapper
+else if ide == "rstudio" then
+  rstudioWrapper
+else if ide == "radian" then
+  radianWrapper
+else
+  throw "rWrapper ide '${ide}' is not valid. Please choose 'rstudio', 'radian', or null."
