@@ -17,6 +17,7 @@
   nss,
   squashfsTools,
   stdenv,
+  systemd,
   writeShellScript,
   xkeyboard_config,
   xorg,
@@ -74,6 +75,11 @@ let
       xorg.xcbutilrenderutil
       xorg.xcbutilwm
       xorg.xrandr
+    ];
+
+    runtimeDependencies = lib.optionals stdenv.hostPlatform.isLinux [
+      # Needed to fix the "Zygote could not fork" error.
+      (lib.getLib systemd)
     ];
 
     strictDeps = true;
